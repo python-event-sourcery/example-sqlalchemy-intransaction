@@ -1,4 +1,37 @@
-from fastapi import APIRouter, Body
+from dataclasses import dataclass
+from typing import Callable, ClassVar, ContextManager, Generator
+
+from event_sourcery.aggregate import Aggregate, Repository
+from event_sourcery.event_store import Backend, Event, StreamUUID
+from fastapi import APIRouter, Body, Depends
+
+from backend import backend
+
+
+@dataclass
+class Quantity(Aggregate):
+    category: ClassVar[str] = "quantity"
+    quantity: int = 0
+
+    class Adjust(Event):
+        quantity: int
+
+    def adjust(self, by: int) -> None:
+        self._emit(self.Adjust(quantity=self.quantity + by))
+
+    def __apply__(self, event: Adjust) -> None:
+        self.quantity = event.quantity
+
+
+class QuantityRepository(Repository[Quantity]):
+    aggregate: Callable[[StreamUUID, Quantity], ContextManager[Quantity]]
+
+
+def quantity_repository(
+    backend: Backend = Depends(backend),
+) -> Generator[QuantityRepository, None, None]:
+    yield QuantityRepository(backend.event_store)
+
 
 router = APIRouter(
     prefix="/inventory",
@@ -14,8 +47,10 @@ router = APIRouter(
 def create_item(
     item: str = Body(...),
     quantity: int = Body(...),
+    repository: QuantityRepository = Depends(quantity_repository),
 ) -> None:
-    raise NotImplementedError
+    with repository.aggregate(StreamUUID(name=item), Quantity()) as aggregate:
+        aggregate.adjust(by=quantity)
 
 
 @router.get(
