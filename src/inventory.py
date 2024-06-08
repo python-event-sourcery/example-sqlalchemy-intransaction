@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, ClassVar, ContextManager, Generator
+from typing import Callable, ClassVar, ContextManager
 
 from event_sourcery.aggregate import Aggregate, Repository
 from event_sourcery.event_store import (
@@ -47,8 +47,8 @@ class QuantityRepository(Repository[Quantity]):
 
 def quantity_repository(
     backend: Backend = Depends(backend),
-) -> Generator[QuantityRepository, None, None]:
-    yield QuantityRepository(backend.event_store)
+) -> Repository[Quantity]:
+    return QuantityRepository(backend.event_store)
 
 
 router = APIRouter(

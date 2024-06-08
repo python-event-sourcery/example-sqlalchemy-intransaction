@@ -1,12 +1,10 @@
-SRCS ?= ${wildcard *.py}
-
 .PHONY: lint
 lint:
-	isort $(SRCS)
-	black $(SRCS)
-	mypy $(SRCS)
-	flake8 $(SRCS)
+	isort src
+	black src
+	mypy src
+	flake8 src
 
 .PHONY: test
 test:
-	pytest $(addprefix --cov ,$(SRC)) tests.py
+	pytest --cov=src --cov-report=term-missing src/tests.py
