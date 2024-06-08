@@ -2,7 +2,14 @@ from dataclasses import dataclass
 from typing import ClassVar, Generator
 
 from event_sourcery.aggregate import Aggregate, Repository
-from event_sourcery.event_store import Backend, Event, StreamUUID
+from event_sourcery.event_store import (
+    Backend,
+    Event,
+    Metadata,
+    Position,
+    StreamId,
+    StreamUUID,
+)
 from fastapi import APIRouter, Body, Depends
 
 from backend import backend
@@ -25,7 +32,13 @@ class Quantity(Aggregate):
 
 
 class QuantityRepository(Repository[Quantity]):
-    pass
+    def process(
+        self,
+        entry: Metadata,
+        stream_id: StreamId,
+        position: Position | None,
+    ) -> None:
+        raise NotImplementedError
 
 
 def quantity_repository(
