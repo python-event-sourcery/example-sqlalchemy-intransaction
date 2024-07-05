@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-python-event-sourcery = {version = "*", extras = ["sqlalchemy"]}
+python-event-sourcery = {version = "*", extras = ["sqlalchemy"], allow-prereleases = true}
 fastapi = "^0.111.0"
 
 
