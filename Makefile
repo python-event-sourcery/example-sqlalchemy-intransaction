@@ -1,9 +1,9 @@
 .PHONY: lint
 lint:
-	isort src
-	black src
-	mypy src
-	flake8 src
+	ruff format src
+	ruff check src --fix
+	mypy src/
+
 
 .PHONY: test
 test:
